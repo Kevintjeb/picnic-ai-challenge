@@ -37,13 +37,13 @@ for layer in model.layers[20:]:
 train_datagen = ImageDataGenerator(
     validation_split=0.3)
 
-train_generator = train_datagen.flow_from_directory('.\picnic-ai-challenge\sorted_classes',
+train_generator = train_datagen.flow_from_directory('.\sorted_classes',
                                                     target_size=(224, 224),
                                                     color_mode='rgb',
                                                     batch_size=32,
                                                     class_mode='categorical')
 
-validation_generator = train_datagen.flow_from_directory('.\picnic-ai-challenge\sorted_classes',
+validation_generator = train_datagen.flow_from_directory('.\sorted_classes',
                                                         target_size=(224, 224),
                                                         color_mode='rgb',
                                                         batch_size=32,
