@@ -1,1 +1,6 @@
 .ipynb_checkpoints/
+*.h5
+sorted_classes/
+test/
+train/
+.idea/
