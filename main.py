@@ -1,12 +1,14 @@
-from keras.applications.vgg16 import VGG16
+from time import time
+
+from keras.applications.resnet50 import ResNet50
 from keras.layers import Dense, Input, Dropout, GlobalAveragePooling2D
 from keras.models import Model
 import numpy as np
 from keras.preprocessing.image import ImageDataGenerator
 from keras.applications.mobilenet import preprocess_input
+from keras.callbacks import TensorBoard, ModelCheckpoint
 
-# imports the vgg16 model and discards the last 1000 neuron layer.
-base_model = VGG16(include_top=False, weights='imagenet', )
+base_model = ResNet50(include_top=False, weights='imagenet', )
 
 x = base_model.output
 x = GlobalAveragePooling2D()(x)
@@ -35,18 +37,19 @@ for layer in model.layers[20:]:
 
 
 train_datagen = ImageDataGenerator(
-    validation_split=0.3)
+    validation_split=0.2)
 
 train_generator = train_datagen.flow_from_directory('.\sorted_classes',
                                                     target_size=(224, 224),
                                                     color_mode='rgb',
-                                                    batch_size=32,
-                                                    class_mode='categorical')
+                                                    batch_size=8,
+                                                    class_mode='categorical',
+                                                    subset='training')
 
 validation_generator = train_datagen.flow_from_directory('.\sorted_classes',
                                                         target_size=(224, 224),
                                                         color_mode='rgb',
-                                                        batch_size=32,
+                                                        batch_size=8,
                                                         class_mode='categorical',
                                                         subset='validation')
 
@@ -59,12 +62,19 @@ model.compile(optimizer='Adam', loss='categorical_crossentropy', metrics=['accur
 # Adam optimizer
 # loss function will be categorical cross entropy
 # evaluation metric will be accuracy
+tensorboard = TensorBoard(log_dir="logs/{}".format(time()))
+
+filepath="checkpoint/weights-improvement-{epoch:02d}-{val_acc:.2f}.hdf5"
+checkpoint = ModelCheckpoint(filepath, monitor='val_acc', verbose=1, save_best_only=True, mode='max')
+callbacks_list = [checkpoint, tensorboard]
 
 model.fit_generator(
     train_generator,
-    steps_per_epoch=200,
+    steps_per_epoch=train_generator.samples,
     epochs=10,
     validation_data=validation_generator,
-    validation_steps=200)
+    validation_steps=train_generator.samples,
+    callbacks=callbacks_list)
+
 
 model.save("picnic_model.h5")

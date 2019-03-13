@@ -4,3 +4,6 @@ sorted_classes/
 test/
 train/
 .idea/
+checkpoint/
+logs/
+*.tsv
